@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -20,34 +21,34 @@ public class ProductController {
     private ProductRepository productRepository;
 
     @GetMapping
-    public ResponseEntity getAllProducts() {
+    public ResponseEntity<List<Product>> getAllProducts() {
         var allProducts = productRepository.findAllByActiveTrue();
         return ResponseEntity.ok(allProducts);
     }
 
     @PostMapping
-    public ResponseEntity registerProduct(@RequestBody @Valid RequestProduct data) {
+    public ResponseEntity<String> registerProduct(@RequestBody @Valid RequestProduct data) {
         Product newProduct = new Product(data);
         productRepository.save(newProduct);
-        return ResponseEntity.ok("Deu certo");
+        return ResponseEntity.ok("Produto criado com sucesso.");
     }
 
     @PutMapping
     @Transactional
-    public ResponseEntity uptadeProduct(@RequestBody @Valid RequestProduct data) {
+    public ResponseEntity<String> uptadeProduct(@RequestBody @Valid RequestProduct data) {
         Optional<Product> optionalProduct = productRepository.findById(data.id());
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
             product.setName(data.name());
             product.setPrice_in_cents(data.price_in_cents());
-            return ResponseEntity.ok("deu bom<PUT>");
+            return ResponseEntity.ok("Produto atualizado com sucesso.");
         }
         throw new EntityNotFoundException();
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity deleteProduct(@PathVariable String id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
         Optional<Product> optionalProduct = productRepository.findById(id);
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
@@ -59,7 +60,7 @@ public class ProductController {
 
     @PatchMapping("/{id}/add/{quantity}")
     @Transactional
-    public ResponseEntity incrementQuantity(@PathVariable String id, @PathVariable int quantity) {
+    public ResponseEntity<String> incrementQuantity(@PathVariable String id, @PathVariable int quantity) {
         Optional<Product> optionalProduct = productRepository.findById(id);
         if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
